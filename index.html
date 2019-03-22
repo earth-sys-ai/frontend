@@ -1,0 +1,23 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Earth-Sys-AI</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="plugins/leaflet-heat/dist/leaflet-heat.js"></script>
+</head>
+<style>
+    #mapid {
+        cursor: crosshair
+    }
+</style>
+<body>
+    <div id="mapid" style="height: 95%; width: 100%"></div>
+    <input type="text" id="ip">
+    <button onclick="addData()">Add data.</button>
+    <button onclick="clearData()">Clear data.</button>
+    <button onclick="dispAll()">Display All</button>
+</body>
+<script src="script.js"></script>   
+</html>
