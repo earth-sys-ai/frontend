@@ -1,6 +1,5 @@
 var curCoord
 
-
 // --------------------------------------------------------------------------------
 // setup map
 var map = L.map('mapid').setView([40.796640, -74.481600], 3)
@@ -10,7 +9,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 
 // setup heatmap
- var heat = L.heatLayer([[0, 0, 0]]).addTo(map);
+var heat = new L.WebGLHeatMap({size: 2, units: 'px', alphaRange: 0.4, autoresize: true});
+map.addLayer(heat)
+heat.addTo(map)
 
 
 // --------------------------------------------------------------------------------
@@ -66,8 +67,10 @@ function dispAll() {
     let urlStr = ("http://" + document.getElementById("ip").value + "/?lis=true")
     $.get(urlStr, function( raw ) {
         let points = JSON.parse(raw).points
-        for (let p in points) {
-            heat.addLatLng(L.latLng(points[p][0], points[p][1]))
+        let values = JSON.parse(raw).values
+        for (i = 0; i < points.length; i++) {
+            heat.addDataPoint(points[i][0], points[i][1], values[i] * 1000);
         }
+        heat._update()
     });
 }
