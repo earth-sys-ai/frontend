@@ -1,4 +1,5 @@
-var curCoord
+var curCoord;
+var curRad = 50;
 
 // --------------------------------------------------------------------------------
 // setup map
@@ -27,7 +28,7 @@ function getData(coord) {
             .setLatLng(coord)
             .setContent(popText)
             .openOn(map)
-      });
+      });  
 }
 
 
@@ -64,7 +65,8 @@ function clearData() {
 // --------------------------------------------------------------------------------
 // display all data on heatmap
 function dispAll() {
-    let urlStr = ("http://" + document.getElementById("ip").value + "/?lis=true")
+    heat.setData([]);
+    let urlStr = ("http://" + document.getElementById("ip").value + "/?lis=true&lat=" + curCoord.lat + "&lng=" + curCoord.lng + "&rad=" + curRad);
     $.get(urlStr, function( raw ) {
         let points = JSON.parse(raw).points
         let values = JSON.parse(raw).values
@@ -73,4 +75,10 @@ function dispAll() {
         }
         heat._update()
     });
+}
+
+
+// updates radius of check
+function circleRange() {
+    curRad = document.getElementById("radiusIn").value;
 }
