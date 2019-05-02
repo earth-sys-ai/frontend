@@ -71,7 +71,7 @@ function dispAll() {
         let points = JSON.parse(raw).points
         let values = JSON.parse(raw).values
         for (i = 0; i < points.length; i++) {
-            heat.addDataPoint(points[i][0], points[i][1], values[i] * 1000);
+            heat.addDataPoint(points[i][1], points[i][0], values[i] * 1000);
         }
         heat._update()
     });
