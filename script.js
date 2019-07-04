@@ -17,8 +17,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 async function onMapClick(e) {
-    curCoord = e.latlng
+    let c = e.latlng
+    curCoord = [c.lat, c.lng]
 }
+map.on('click', onMapClick)
 
 // --------------------------------------------------------------------------------
 // set level and ip data for server
@@ -106,7 +108,7 @@ function loadPolys() {
                 curPolys.push(tPoly);
                 tPoly.addTo(map);
                 console.log(rgbToHex(255 - color, color, 0) + ": " + color);
-            })
+            });
         });
     });
 }
@@ -126,7 +128,7 @@ function inPoly(x, y, poly) {
             if (intersect) inside = !inside;
         }
     }
-    return inside;
+    return inside
 }
 
 
