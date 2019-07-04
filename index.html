@@ -14,11 +14,12 @@
 <body>
     <div id="mapid" style="height: 95%; width: 100%">
     </div>
-    <input type="text" id="ip">
-    <button onclick="addData()">Add data.</button>
-    <button onclick="clearData()">Clear data.</button>
-    <button onclick="dispAll()">Display All</button>
-    <input type="range" min="1" max="1000" step="1" value="50" id="radiusIn" onchange="circleRange()"></input>
+    <button onclick="setServer()">Set Server</button>
+    <select id="levelSelect"></select>
+    <button onclick="loadPolys()">Load Polygons</button>
+    <button onclick="addCurPoint()">Add point</button>
+    <button onclick="clearTransect()">Clear points</button>
+    <button onclick="viewTransect()">View Transection</button>
 
 </body>
     <script src="./plugins/heat/webgl-heatmap.js"></script>

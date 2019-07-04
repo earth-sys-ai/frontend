@@ -1,84 +1,118 @@
-var curCoord;
-var curRad = 50;
+// sever data vars
+var serverIp = ""
+var levelAval
 
 // --------------------------------------------------------------------------------
 // setup map
-var map = L.map('mapid').setView([40.796640, -74.481600], 3)
+var map = L.map('mapid', {drawControl: true}).setView([40.796640, -74.481600], 3)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
 
-// setup heatmap
-var heat = new L.WebGLHeatMap({size: 2, units: 'px', alphaRange: 0.4, autoresize: true});
-map.addLayer(heat)
-heat.addTo(map)
-
-
 // --------------------------------------------------------------------------------
-// get json from api
-function getData(coord) {
-    let urlStr = ("http://" + document.getElementById("ip").value + "/?lat=" + Math.round(coord.lat) + "&lng=" + Math.round(coord.lng) + "&red=true")
-    $.get(urlStr, function( raw ) {
-            let json = JSON.parse(raw)
-            let data = json.data
-            let popText = ("Lat:" + Math.round(coord.lat) + "<br>Lng: " + Math.round(coord.lng) + "<br>--<br>" + data)
-
-            var popup = L.popup()
-            .setLatLng(coord)
-            .setContent(popText)
-            .openOn(map)
-      });  
-}
-
-
-// --------------------------------------------------------------------------------
-// display elevation of current clicked place on map
-async function onMapClick(e) {
-    curCoord = e.latlng
-    getData(e.latlng)
-}
-map.on('click', onMapClick)
-
-
-// --------------------------------------------------------------------------------
-// store data in database
-function addData() {
-    let data = prompt("New data to add for this location:")
-    let urlStr = ("http://" + document.getElementById("ip").value + "/?lat=" + Math.round(curCoord.lat) + "&lng=" + Math.round(curCoord.lng) + "&add=" + data) 
-
-    $.get(urlStr);
-    getData(curCoord)
-}
-
-
-// --------------------------------------------------------------------------------
-// clear data of location
-function clearData() {
-    if (confirm("Are you sure you want to clear data for this location?")) {
-        let urlStr = ("http://" + document.getElementById("ip").value + "/?lat=" + Math.round(curCoord.lat) + "&lng=" + Math.round(curCoord.lng) + "&clr=true") 
-        $.get(urlStr);
-        getData(curCoord)
-    }
-}
-
-// --------------------------------------------------------------------------------
-// display all data on heatmap
-function dispAll() {
-    heat.setData([]);
-    let urlStr = ("http://" + document.getElementById("ip").value + "/?lis=true&lat=" + curCoord.lat + "&lng=" + curCoord.lng + "&rad=" + curRad);
-    $.get(urlStr, function( raw ) {
-        let points = JSON.parse(raw).points
-        let values = JSON.parse(raw).values
-        for (i = 0; i < points.length; i++) {
-            heat.addDataPoint(points[i][1], points[i][0], values[i] * 1000);
-        }
-        heat._update()
+// set level and ip data for server
+function setServer() {
+    serverIp = prompt("Server IP:")
+    let urlStr = ("http://" + serverIp + "/?com=listLevels")
+    $.getJSON(urlStr, function(data) {
+        levelAval = data.levels;
+        select = document.getElementById('levelSelect');
+        levelAval.forEach(function(item) {
+            var opt = document.createElement("option");
+            opt.value = item;
+            opt.innerHTML = item;
+            select.appendChild(opt);
+        });
     });
 }
 
+// --------------------------------------------------------------------------------
+// for color generation
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
 
-// updates radius of check
-function circleRange() {
-    curRad = document.getElementById("radiusIn").value;
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+// --------------------------------------------------------------------------------
+// clear polygons from map
+function clearMap() {
+    for(i in map._layers) {
+        if(map._layers[i]._path != undefined) {
+            map.removeLayer(map._layers[i]);
+        }
+    }
+}
+
+
+// --------------------------------------------------------------------------------
+// convert and draw polygons
+function loadPolys() {
+    let level = document.getElementById("levelSelect").value;
+    let urlStr = ("http://" + serverIp + "/?com=getData&level=" + level)
+
+
+    $.getJSON(urlStr, function(data) {
+        
+
+       clearMap()
+        
+
+
+
+
+        let levels = data.levels
+        let min = data.info.min
+        let max = data.info.max
+
+
+
+
+        levels.forEach(function(item) {
+            let polys = item.polygons;
+            let value = item.value;
+
+            // loop through polygons and add them to map with given value
+            polys.forEach(function(poly) {
+                let verts = poly.vertices;
+                var curPoly = []
+
+                // make verts into polygon
+                verts.forEach(function(vert) {
+                    let lat = vert.lat
+                    let lng = vert.lng
+                    curPoly.push([lng, lat])
+                });
+
+                // add polygon
+                let color = Math.round(((value - min) / (max - min)) * 255)
+                L.polygon(curPoly, {fillColor: rgbToHex(color, 255 - color, 0), fillOpacity: 0.2, opacity: 0}).addTo(map);
+                console.log(rgbToHex(255 - color, color, 0) + ": " + color);
+            })
+
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
 }
