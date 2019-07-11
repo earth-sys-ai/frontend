@@ -8,6 +8,8 @@ var tValues = []
 var curCoord
 var curPolys = []
 
+// colors
+var colorArray = []
 
 // --------------------------------------------------------------------------------
 // setup map
@@ -42,15 +44,23 @@ function setServer() {
 
 // --------------------------------------------------------------------------------
 // for color generation
-function componentToHex(c) {
-    var hex = c.toString(16);
+function genColors(levels, min, max) {
+    colorArray = []
+    var colorInterpolator = d3.interpolateHslLong("red", "blue");
+    for (var level = 0; level < levels; level++) {
+        colorArray.push(parseColor(colorInterpolator(((1 - 0) / (max - min)) * (level - min))))
+    }
+}
+
+function parseColor(color) {
+    var arr=[]; color.replace(/[\d+\.]+/g, function(v) { arr.push(parseFloat(v)); });
+    return ("#" + arr.slice(0, 3).map(toHex).join(""));
+}
+
+function toHex(int) {
+    var hex = int.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
 }
-
-function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
-
 
 // --------------------------------------------------------------------------------
 // clear polygons from map
@@ -83,6 +93,10 @@ function loadPolys() {
         let levels = data.levels
         let min = data.info.min
         let max = data.info.max
+        let curLevel = 0;
+
+        // gen colors
+        genColors(level, min, max)
 
         // loop through levels
         levels.forEach(function(item) {
@@ -103,12 +117,12 @@ function loadPolys() {
                 });
 
                 // add polygon
-                let color = Math.round(((value - min) / (max - min)) * 255)
-                var tPoly = L.polygon(curPoly, {fillColor: rgbToHex(color, 255 - color, 0), fillOpacity: 0.2, opacity: 0});
+                var tPoly = L.polygon(curPoly, {fillColor: colorArray[curLevel], fillOpacity: 0.25, opacity: 0});
                 curPolys.push(tPoly);
                 tPoly.addTo(map);
-                console.log(rgbToHex(255 - color, color, 0) + ": " + color);
+
             });
+            curLevel++
         });
     });
 }
