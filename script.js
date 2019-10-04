@@ -6,7 +6,6 @@ var levelAval
 var tPoints = []
 var tValues = []
 var curCoord
-var curPolys = []
 
 // colors
 var colorArray = []
@@ -129,44 +128,32 @@ function loadPolys() {
 
 
 // --------------------------------------------------------------------------------
-// checks if points reside in a given polygon
-function inPoly(x, y, poly) {
-    var inside = false;
-    for (var ii=0; ii<poly.getLatLngs().length;ii++){
-        var polyPoints = poly.getLatLngs()[ii];
-        for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-            var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
-            var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
-            var intersect = ((yi > y) != (yj > y))
-                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-            if (intersect) inside = !inside;
-        }
-    }
-    return inside
-}
-
-
-// --------------------------------------------------------------------------------
 // returns list of values at each point
-function getValues(points, polygons) {
+function getValues(points) {
     var out = []
-    var i = 0
+
+    // encode
+    pointQuery = ""
     points.forEach(function(point) {
-        polygons.forEach(function(poly) {
-            if ((inPoly(point[0], point[1], poly))) {
-                out.push(tValues[i])
-            }
-            i += 1
-        });
+        pointQuery += "(" + curCoord[0] + "," + curCoord[1] + ")"
     });
-    return out
+    
+    let level = document.getElementById("levelSelect").value;
+    let urlStr = ("http://" + serverIp + "/?com=transect&level=" + level + "&line=" + pointQuery)
+    console.log(urlStr)
+
+
+    $.getJSON(urlStr, function(data) {
+        return data
+    });
 }
 
 
 // --------------------------------------------------------------------------------
 // deals with points for transection
 function addCurPoint() {
-    tPoints.push(curCoord)
+    tPoints.push(curCoord);
+    L.marker(curCoord).addTo(map);
 }
 
 function clearTransect() {
@@ -174,5 +161,5 @@ function clearTransect() {
 }
 
 function viewTransect() {
-    console.log(getValues(tValues, curPolys))
+    console.log(getValues(tPoints))
 }
