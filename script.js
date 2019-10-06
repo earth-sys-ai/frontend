@@ -112,7 +112,7 @@ function loadPolys() {
                 verts.forEach(function(vert) {
                     let lat = vert.lat
                     let lng = vert.lng
-                    curPoly.push([lng, lat])
+                    curPoly.push([lat, lng])
                 });
 
                 // add polygon
@@ -135,16 +135,17 @@ function getValues(points) {
     // encode
     pointQuery = ""
     points.forEach(function(point) {
-        pointQuery += "(" + curCoord[0] + "," + curCoord[1] + ")"
+        pointQuery += "(" + point[0] + "," + point[1] + ")"
     });
-    
+   
+    // create url to get
     let level = document.getElementById("levelSelect").value;
     let urlStr = ("http://" + serverIp + "/?com=transect&level=" + level + "&line=" + pointQuery)
     console.log(urlStr)
 
-
+    // return parsed json response
     $.getJSON(urlStr, function(data) {
-        return data
+        return data.values
     });
 }
 
