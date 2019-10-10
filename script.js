@@ -6,6 +6,7 @@ var levelAval
 var tPoints = []
 var tValues = []
 var curCoord
+var markers = []
 
 // colors
 var colorArray = []
@@ -63,7 +64,7 @@ function toHex(int) {
 
 // --------------------------------------------------------------------------------
 // clear polygons from map
-function clearMap() {
+function clearPolys() {
     for(i in map._layers) {
         if(map._layers[i]._path != undefined) {
             map.removeLayer(map._layers[i]);
@@ -84,7 +85,7 @@ function loadPolys() {
     $.getJSON(urlStr, function(data) {
         
         // wipe previous polygons
-        clearMap()
+        clearPolys()
         tValues = []
         curPolys = []
         
@@ -128,6 +129,32 @@ function loadPolys() {
 
 
 // --------------------------------------------------------------------------------
+// open graph of transection values
+function graphTransect(values) {
+
+    // create chart on last point
+    markers[markers.length - 1]
+    .bindPopup('<div id="chartContainer"></div>').openPopup();
+    chartContainer.setAttribute("style", "width:500px");
+
+    // create chart
+    var chart = new CanvasJS.Chart("chartContainer",
+    {
+      title:{
+      text: "Transection"
+      },
+       data: [
+      {
+        type: "line",
+        dataPoints: values 
+      }
+      ]
+    });
+    chart.render();
+}
+
+
+// --------------------------------------------------------------------------------
 // returns list of values at each point
 function getValues(points) {
     var out = []
@@ -143,9 +170,17 @@ function getValues(points) {
     let urlStr = ("http://" + serverIp + "/?com=transect&level=" + level + "&line=" + pointQuery)
     console.log(urlStr)
 
-    // return parsed json response
+    // parse returned values
     $.getJSON(urlStr, function(data) {
-        return data.values
+        outp = []
+
+        // convert to graph format
+        data.values.forEach(function (v) {
+            outp.push({y: v})
+        });
+
+        // graph points
+        graphTransect(outp);
     });
 }
 
@@ -154,11 +189,16 @@ function getValues(points) {
 // deals with points for transection
 function addCurPoint() {
     tPoints.push(curCoord);
-    L.marker(curCoord).addTo(map);
+    let m = L.marker(curCoord);
+    map.addLayer(m);
+    markers.push(m);
 }
 
 function clearTransect() {
     tPoints = []
+    markers.forEach(function (m){
+        map.removeLayer(m);
+    })
 }
 
 function viewTransect() {
