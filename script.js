@@ -148,7 +148,13 @@ function graphTransect(values) {
         type: "line",
         dataPoints: values 
       }
-      ]
+    ],
+      axisY: {
+          title: "Maximum Elevation (m)"
+      },
+      axisX: {
+          title: "Coordinate Index"
+      }
     });
     chart.render();
 }
@@ -192,6 +198,14 @@ function addCurPoint() {
     let m = L.marker(curCoord);
     map.addLayer(m);
     markers.push(m);
+}
+
+function importPoints(arr) {
+    clearTransect()
+    arr.forEach(function (v) {
+      curCoord = v;
+      addCurPoint();  
+    })
 }
 
 function clearTransect() {
